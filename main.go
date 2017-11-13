@@ -1,17 +1,15 @@
 /* This program runs in the background on OSX Sierra and kills the McAffee vshield scanner
 
-Installing it:
-
-Create a new plist in ~/Library/LaunchAgents/com.user.fuckIcloud.plist, with these contents.
+Installing it (requires root):
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC -//Apple Computer//DTD PLIST 1.0//EN http://www.apple.com/DTDs/PropertyList-1.0.dtd >
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.user.fuckiCloud</string> <- replace with your user
-    <key>FuckiCloud</key>
-    <string>/full/path/to/fuckiCloud</string> <- replace with full path.
+    <string>com.user.fuckVShield</string> <- replace with your user
+    <key>fuckVshield</key>
+    <string>/full/path/to/fuckVShield</string> <- replace with full path.
     <key>KeepAlive</key>
     <true/>
   </dict>
@@ -54,6 +52,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -79,7 +78,7 @@ func main() {
 		}
 	}()
 
-	t := 1 * time.Second
+	t := 5 * time.Second
 	duration := time.NewTicker(t)
 
 	for range duration.C {
@@ -89,14 +88,14 @@ func main() {
 }
 
 func nukeShit() {
-	out, err := exec.Command("bash", "-c", "ps -ef | grep -i vshield | grep -v grep | awk '{print $2}'").Output()
+	out, err := exec.Command("bash", "-c", "ps -ef | grep -i vshieldscanner | grep -v grep | awk '{print $2}'").Output()
 	if err != nil {
 		fmt.Printf("An error occured: %#v\n", err)
 	}
 	outputVShield := fmt.Sprintf("%s", out)
 	processes := strings.Split(outputVShield, "\n")
 	for _, proc := range processes {
-		fmt.Println(proc)
+		fmt.Printf("Killing process: %s\n", proc)
 		if len(proc) == 0 {
 			continue
 		}
@@ -106,12 +105,15 @@ func nukeShit() {
 		}
 
 		go func(PID int) {
+			rand.Seed(time.Now().Unix())
+			d := time.Duration(rand.Intn(11-1) + 1)
+			time.Sleep(d * time.Second)
 			killProc, err := os.FindProcess(PID)
 			if err != nil {
 				fmt.Println("Error occured while finding process")
 			}
 			if err := killProc.Kill(); err != nil {
-				fmt.Printf("Error killing process: %#v\n", err)
+				fmt.Printf("Error killing process: %s\n", err)
 			}
 		}(proc)
 	}
